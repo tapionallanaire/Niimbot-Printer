@@ -24,6 +24,10 @@
     [printHelper onStartPrintText:call result:result];
   } else if ([onStartPrintQrCode isEqualToString:call.method]) {
     [printHelper onStartPrintQrCode:call result:result];
+  } else if ([onStartPrintRollLabel isEqualToString:call.method]) {
+    result([FlutterError errorWithCode:@"UNIMPLEMENTED"
+                                message:@"onStartPrintRollLabel is not implemented on iOS"
+                                details:nil]);
   } else if ([onDisconnect isEqualToString:call.method]) {
     [printHelper onDisconnect:result];
   } else if ([isConnected isEqualToString:call.method]) {
