@@ -2,6 +2,14 @@
 
 All notable changes to `niimbot_print` will be documented here.
 
+## 0.1.5-bg
+
+### Added
+
+- Add `onStartPrintRollLabel(code, lines, qrSizeMm)` to print a QR code and up to a few lines of
+  text on a single 50 x 30 mm label. Implemented on Android; iOS returns an `UNIMPLEMENTED`
+  `FlutterError` for now.
+
 ## 0.1.4
 
 ### Fixed

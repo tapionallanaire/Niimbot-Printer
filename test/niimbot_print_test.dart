@@ -27,6 +27,9 @@ class _FakePlatform extends NiimbotPrintPlatform
   List<BlueDeviceInfoModel> scanResults = <BlueDeviceInfoModel>[];
   List<PrintLabelModel>? receivedLabels;
   PrintQrCodeModel? receivedQrCode;
+  String? receivedRollLabelCode;
+  List<String>? receivedRollLabelLines;
+  double? receivedRollLabelQrSizeMm;
 
   @override
   Future<List<BlueDeviceInfoModel>> onStartScan({
@@ -51,6 +54,17 @@ class _FakePlatform extends NiimbotPrintPlatform
   }) async {
     receivedLabels = printLabelModelList;
     onResult(true, 'ok');
+  }
+
+  @override
+  Future<void> onStartPrintRollLabel({
+    required String code,
+    required List<String> lines,
+    required double qrSizeMm,
+  }) async {
+    receivedRollLabelCode = code;
+    receivedRollLabelLines = lines;
+    receivedRollLabelQrSizeMm = qrSizeMm;
   }
 }
 
@@ -169,6 +183,67 @@ void main() {
 
       expect(platform.receivedLabels?.single.text, 'First\nSecond Third');
     });
+
+    test('roll label code is trimmed and forwarded to the platform',
+        () async {
+      await printer.onStartPrintRollLabel(
+        code: '  ROLL-001  ',
+        lines: const <String>['ROLL-001', 'Cotton', '12.5 kg'],
+      );
+
+      expect(platform.receivedRollLabelCode, 'ROLL-001');
+      expect(
+        platform.receivedRollLabelLines,
+        <String>['ROLL-001', 'Cotton', '12.5 kg'],
+      );
+      expect(platform.receivedRollLabelQrSizeMm, 24);
+    });
+
+    test('empty roll label code does not reach the platform', () async {
+      expect(
+        () => printer.onStartPrintRollLabel(
+          code: '   ',
+          lines: const <String>['ROLL-001'],
+        ),
+        throwsArgumentError,
+      );
+      expect(platform.receivedRollLabelCode, isNull);
+    });
+
+    test('zero roll label lines does not reach the platform', () async {
+      expect(
+        () => printer.onStartPrintRollLabel(
+          code: 'ROLL-001',
+          lines: const <String>[],
+        ),
+        throwsArgumentError,
+      );
+      expect(platform.receivedRollLabelCode, isNull);
+    });
+
+    test('more than six roll label lines does not reach the platform',
+        () async {
+      expect(
+        () => printer.onStartPrintRollLabel(
+          code: 'ROLL-001',
+          lines: const <String>['1', '2', '3', '4', '5', '6', '7'],
+        ),
+        throwsArgumentError,
+      );
+      expect(platform.receivedRollLabelCode, isNull);
+    });
+
+    test('invalid roll label QR size does not reach the platform', () async {
+      expect(
+        () => printer.onStartPrintRollLabel(
+          code: 'ROLL-001',
+          lines: const <String>['ROLL-001'],
+          qrSizeMm: 31,
+        ),
+        throwsArgumentError,
+      );
+      expect(platform.receivedRollLabelCode, isNull);
+    });
   });
 
   group('MethodChannelNiimbotPrint', () {
@@ -218,6 +293,31 @@ void main() {
       expect(
         jsonDecode(receivedCall?.arguments as String),
         <String, Object>{'data': 'qr-value', 'size': 18.0},
+      );
+    });
+
+    test('roll label is serialized for the native channel', () async {
+      MethodCall? receivedCall;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        receivedCall = call;
+        return true;
+      });
+
+      await MethodChannelNiimbotPrint().onStartPrintRollLabel(
+        code: 'ROLL-001',
+        lines: const <String>['ROLL-001', 'Cotton', '12.5 kg'],
+        qrSizeMm: 24,
+      );
+
+      expect(receivedCall?.method, 'onStartPrintRollLabel');
+      expect(
+        jsonDecode(receivedCall?.arguments as String),
+        <String, Object>{
+          'code': 'ROLL-001',
+          'lines': <String>['ROLL-001', 'Cotton', '12.5 kg'],
+          'qrSizeMm': 24.0,
+        },
       );
     });
   });

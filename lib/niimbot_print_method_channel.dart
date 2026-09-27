@@ -103,6 +103,21 @@ class MethodChannelNiimbotPrint extends NiimbotPrintPlatform {
   }
 
   @override
+  Future<void> onStartPrintRollLabel(
+      {required String code,
+      required List<String> lines,
+      required double qrSizeMm}) async {
+    await methodChannel.invokeMethod<Object?>(
+      PluginConstant.onStartPrintRollLabel,
+      jsonEncode(<String, Object?>{
+        'code': code,
+        'lines': lines,
+        'qrSizeMm': qrSizeMm,
+      }),
+    );
+  }
+
+  @override
   Future<bool> onDisconnect() async {
     try {
       return await methodChannel

@@ -17,4 +17,6 @@ class MessageConstant {
   static const String emptyPrintData = 'Print data cannot be empty.';
   static const String invalidQrSize =
       'QR code size must be greater than 0 and no larger than 30 mm.';
+  static const String invalidRollLabelLineCount =
+      'A roll label must have between 1 and 6 lines of text.';
 }

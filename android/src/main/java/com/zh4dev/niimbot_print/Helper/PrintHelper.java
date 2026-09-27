@@ -20,9 +20,11 @@ import com.zh4dev.niimbot_print.Constant.PrintConstant;
 import com.zh4dev.niimbot_print.Model.BlueDeviceInfoModel;
 import com.zh4dev.niimbot_print.Model.PrintLabelModel;
 import com.zh4dev.niimbot_print.Model.PrintQrCodeModel;
+import com.zh4dev.niimbot_print.Model.PrintRollLabelModel;
 import com.zh4dev.niimbot_print.Utility.PrintUtility;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -340,6 +342,20 @@ public class PrintHelper {
             return;
         }
         printUtility.printQrCode(qrCode, result);
+    }
+
+    public void onStartPrintRollLabel(@NonNull MethodCall call, @NonNull Result result) {
+        if (call.arguments == null) {
+            result.error(KeyConstant.emptyText, MessageConstant.pleaseInputText, null);
+            return;
+        }
+        PrintRollLabelModel model = PrintRollLabelModel.fromJson(call.arguments.toString());
+        if (model.getCode() == null || model.getCode().trim().isEmpty()) {
+            result.error(KeyConstant.emptyText, MessageConstant.pleaseInputText, null);
+            return;
+        }
+        List<String> lines = model.getLines() != null ? model.getLines() : Collections.emptyList();
+        printUtility.printRollLabel(model.getCode(), lines, (float) model.getQrSizeMm(), result);
     }
 
     public void dispose() {

@@ -1,6 +1,6 @@
 name: niimbot_print
 description: Print text labels and QR codes with supported Niimbot Bluetooth printers on Android and iOS.
-version: 0.1.4
+version: 0.1.5-bg
 homepage: https://zh4dev.github.io/
 repository: https://github.com/zh4dev/Niimbot-Printer
 issue_tracker: https://github.com/zh4dev/Niimbot-Printer/issues

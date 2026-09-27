@@ -43,6 +43,13 @@ abstract class NiimbotPrintPlatform extends PlatformInterface {
     throw UnimplementedError(MessageConstant.errorPlatformNotImplemented);
   }
 
+  Future<void> onStartPrintRollLabel(
+      {required String code,
+      required List<String> lines,
+      required double qrSizeMm}) async {
+    throw UnimplementedError(MessageConstant.errorPlatformNotImplemented);
+  }
+
   Future<bool> onDisconnect() {
     throw UnimplementedError(MessageConstant.errorPlatformNotImplemented);
   }

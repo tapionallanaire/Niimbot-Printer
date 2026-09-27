@@ -184,6 +184,45 @@ class NiimbotPrint {
     );
   }
 
+  /// Prints a QR code and up to a few lines of text on one 50 x 30 mm label.
+  ///
+  /// [code] is encoded as a QR code on the left of the label; [lines] are
+  /// printed as separate lines of text in the right-hand box, and must have
+  /// between 1 and 6 entries. Throws an [ArgumentError] when [code] is
+  /// empty, [lines] has the wrong number of entries, or [qrSizeMm] is out of
+  /// range, and a [StateError] when Bluetooth permissions or the adapter are
+  /// not ready. A native print failure (for example "Printer not connected"
+  /// or "Another print job is in progress") surfaces as a
+  /// [PlatformException] thrown from the method channel.
+  Future<void> onStartPrintRollLabel({
+    required String code,
+    required List<String> lines,
+    double qrSizeMm = 24,
+  }) async {
+    final trimmedCode = code.trim();
+    if (trimmedCode.isEmpty) {
+      throw ArgumentError(MessageConstant.emptyPrintData);
+    }
+    if (lines.isEmpty || lines.length > 6) {
+      throw ArgumentError(MessageConstant.invalidRollLabelLineCount);
+    }
+    if (qrSizeMm <= 0 || qrSizeMm > 30) {
+      throw ArgumentError(MessageConstant.invalidQrSize);
+    }
+    final errorMessage = await _isAllPassed();
+    if (errorMessage != null) {
+      throw StateError(errorMessage);
+    }
+    return NiimbotPrintPlatform.instance.onStartPrintRollLabel(
+      code: trimmedCode,
+      lines: lines
+          .map((line) => line.trim())
+          .where((line) => line.isNotEmpty)
+          .toList(growable: false),
+      qrSizeMm: qrSizeMm,
+    );
+  }
+
   /// Disconnects the current printer.
   Future<bool> onDisconnect() => NiimbotPrintPlatform.instance.onDisconnect();
 

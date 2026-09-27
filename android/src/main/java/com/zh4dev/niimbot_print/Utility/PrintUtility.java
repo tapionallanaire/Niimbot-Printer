@@ -33,6 +33,7 @@ public class PrintUtility {
     private static final float TEXT_WIDTH_MM =
             LABEL_WIDTH_MM - (TEXT_HORIZONTAL_PADDING_MM * 2.0F);
     private static final int QR_CODE_TYPE = 31;
+    private static final double ROLL_LABEL_FONT_SIZE = 12.0;
 
     private final Application application;
     private final LocalDataHelper localDataHelper;
@@ -170,6 +171,54 @@ public class PrintUtility {
                     QR_CODE_TYPE,
                     0
             );
+            return createPrintData();
+        });
+    }
+
+    public void printRollLabel(
+            String code,
+            List<String> lines,
+            float qrSizeMm,
+            @NonNull MethodChannel.Result result
+    ) {
+        startPrint(result, () -> {
+            float size = qrSizeMm;
+            api.drawEmptyLabel(LABEL_WIDTH_MM, LABEL_HEIGHT_MM, 0, "");
+            api.drawLabelQrCode(
+                    2F,
+                    (LABEL_HEIGHT_MM - size) / 2F,
+                    size,
+                    size,
+                    code,
+                    QR_CODE_TYPE,
+                    0
+            );
+
+            float textX = size + 4F;
+            float textWidth = LABEL_WIDTH_MM - size - 6F;
+            int lineCount = Math.max(lines.size(), 1);
+            float lineHeight = LABEL_HEIGHT_MM / (float) lineCount;
+            float fontSize = (float) (ROLL_LABEL_FONT_SIZE / 4.5);
+            float currentY = 0F;
+            for (String line : lines) {
+                api.drawLabelText(
+                        textX,
+                        currentY,
+                        textWidth,
+                        lineHeight,
+                        line,
+                        KeyConstant.defaultFontName,
+                        fontSize,
+                        0,
+                        1,
+                        1,
+                        6,
+                        0,
+                        1,
+                        new boolean[]{false, false, false, false}
+                );
+                currentY += lineHeight;
+            }
             return createPrintData();
         });
     }
